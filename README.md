@@ -4,16 +4,17 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-A Python client library for interacting with the Zymmr Project Management API.
+A robust Python client library for interacting with Zymmr Project Management API, built on **Frappe Framework v14**.
 
 ## ✨ Features
 
-- 🚀 Simple and intuitive API interface
-- 🔐 Authentication handling (API key support)
-- 📝 Full CRUD operations for projects, tasks, and resources
-- 🔄 Error handling and retry mechanisms
-- 💡 Type hints for better development experience
-- 🧪 Comprehensive test coverage
+- 🚀 **Simple and Intuitive**: Clean API interface inspired by frappe-client but more robust
+- 🔐 **Frappe Authentication**: Session-based authentication with username/password
+- 📋 **Complete DocType Access**: Get any DocType from your Zymmr instance
+- 🔄 **Robust Error Handling**: Custom exceptions for all Frappe API scenarios
+- ⚡ **Retry Logic**: Exponential backoff for network failures
+- 💡 **Type Safety**: Full type hints for excellent developer experience
+- 🎯 **Production Ready**: Built for real-world Frappe applications
 
 ## 📦 Installation
 
@@ -37,93 +38,142 @@ poetry add zymmr-client
 ```python
 from zymmr_client import ZymmrClient
 
-# Initialize the client
+# Initialize the client with your Zymmr instance
 client = ZymmrClient(
-    base_url="https://your-zymmr-instance.com",
-    api_key="your-api-key"
+    base_url="https://zymmr.yourdomain.com",
+    username="your-username",
+    password="your-password"
 )
 
-# Get all projects
-projects = client.projects.list()
+# Get list of projects
+projects = client.get_list("Project", 
+                          fields=["name", "project_name", "status"],
+                          limit_page_length=10)
 
-# Create a new task
-task = client.tasks.create({
-    "title": "My Task",
-    "project_id": "project-123",
-    "status": "open"
-})
+# Get list of tasks with filters
+tasks = client.get_list("Task",
+                       fields=["name", "subject", "status", "priority"],
+                       filters={"status": ["in", ["Open", "Working"]]},
+                       order_by="priority desc")
 
-# Update a task
-updated_task = client.tasks.update("task-123", {
-    "status": "completed"
-})
+# Get a specific document
+project = client.get_doc("Project", "PROJ-001")
 
-# Delete a task
-client.tasks.delete("task-123")
+# Test connection
+if client.ping():
+    print("✅ Connected to Zymmr!")
+
+# Get current user info
+user_info = client.get_user_info()
+print(f"Logged in as: {user_info['username']}")
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
-```bash
-export ZYMMR_API_KEY="your-api-key"
-export ZYMMR_BASE_URL="https://your-zymmr-instance.com"
+### Basic Configuration
+```python
+from zymmr_client import ZymmrClient
+
+# Basic initialization
+client = ZymmrClient(
+    base_url="https://zymmr.yourdomain.com",
+    username="your-username",
+    password="your-password"
+)
+
+# With custom timeout and retry settings
+client = ZymmrClient(
+    base_url="https://zymmr.yourdomain.com", 
+    username="your-username",
+    password="your-password",
+    timeout=60,          # Request timeout in seconds
+    max_retries=5,       # Max retry attempts
+    debug=True           # Enable debug logging
+)
 ```
 
-### Configuration File
-Create a `.zymmr` config file in your project root:
-```json
-{
-    "base_url": "https://your-zymmr-instance.com",
-    "api_key": "your-api-key",
-    "timeout": 30,
-    "retry_count": 3
-}
+### Context Manager (Recommended)
+```python
+# Automatic session cleanup
+with ZymmrClient(base_url, username, password) as client:
+    projects = client.get_list("Project")
+    # Session automatically closed when done
 ```
 
 ## 📖 API Reference
 
-### Projects
+### Core Methods
+
+#### `get_list(doctype, **kwargs)`
+Get a list of documents from any Frappe DocType:
+
 ```python
-# List all projects
-projects = client.projects.list()
+# Basic usage
+projects = client.get_list("Project")
 
-# Get a specific project
-project = client.projects.get("project-id")
+# With specific fields
+projects = client.get_list("Project", 
+                          fields=["name", "project_name", "status"])
 
-# Create a new project
-project = client.projects.create({
-    "name": "My Project",
-    "description": "Project description"
-})
+# With filters
+open_tasks = client.get_list("Task", 
+                            fields=["name", "subject", "priority"],
+                            filters={"status": "Open"},
+                            order_by="priority desc",
+                            limit_page_length=50)
 
-# Update a project
-project = client.projects.update("project-id", {"name": "Updated Name"})
-
-# Delete a project
-client.projects.delete("project-id")
+# Complex filters
+recent_projects = client.get_list("Project",
+                                 filters={
+                                     "status": ["in", ["Active", "On Hold"]],
+                                     "creation": [">", "2024-01-01"]
+                                 })
 ```
 
-### Tasks
+#### `get_doc(doctype, name, fields=None)`
+Get a specific document:
+
 ```python
-# List tasks (with optional filtering)
-tasks = client.tasks.list(project_id="project-123", status="open")
+# Get full document
+project = client.get_doc("Project", "PROJ-001")
 
-# Get a specific task
-task = client.tasks.get("task-id")
+# Get specific fields only
+task = client.get_doc("Task", "TASK-001", 
+                     fields=["name", "subject", "status"])
+```
 
-# Create a new task
-task = client.tasks.create({
-    "title": "Task Title",
-    "project_id": "project-123",
-    "assignee": "user-123"
-})
+#### Utility Methods
 
-# Update a task
-task = client.tasks.update("task-id", {"status": "in-progress"})
+```python
+# Test connection
+is_connected = client.ping()
 
-# Delete a task
-client.tasks.delete("task-id")
+# Get current user information
+user_info = client.get_user_info()
+
+# Check authentication status
+if client.is_authenticated:
+    print("Client is authenticated")
+
+# Clean session cleanup
+client.close()
+```
+
+### Available DocTypes
+Access any DocType from your Zymmr/Frappe instance:
+
+```python
+# Standard Frappe DocTypes
+users = client.get_list("User")
+doctypes = client.get_list("DocType")
+
+# Zymmr-specific DocTypes (depends on your setup)
+projects = client.get_list("Project")
+tasks = client.get_list("Task")
+issues = client.get_list("Issue")
+
+# Custom DocTypes
+custom_docs = client.get_list("Your Custom DocType")
 ```
 
 ## 🛠️ Development
@@ -202,9 +252,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Thanks to the Zymmr team for the excellent API
-- Inspired by [frappe-client](https://github.com/frappe/frappe-client) architecture
-- Built with modern Python packaging tools ([uv](https://github.com/astral-sh/uv))
+- Thanks to the Zymmr team for building on Frappe Framework
+- Inspired by [frappe-client](https://github.com/frappe/frappe-client) but rebuilt for modern Python
+- Built specifically for Frappe Framework v14 REST API
+- Powered by [uv](https://github.com/astral-sh/uv) for fast dependency management
 
 ---
 

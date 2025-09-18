@@ -1,7 +1,7 @@
 [project]
 name = "zymmr-client"
-version = "0.1.1"
-description = "Python client library for Zymmr Project Management API"
+version = "0.2.0"
+description = "Robust Python client for Zymmr API built on Frappe Framework v14"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
