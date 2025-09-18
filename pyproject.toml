@@ -1,6 +1,6 @@
 [project]
 name = "zymmr-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python client library for Zymmr Project Management API"
 readme = "README.md"
 license = { text = "MIT" }

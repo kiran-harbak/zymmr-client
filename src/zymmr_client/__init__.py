@@ -1,6 +1,6 @@
 """Zymmr Client - Python library for Zymmr Project Management API."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Kiran Harbak"
 __email__ = "kiran.harbak@amruts.com"
 
