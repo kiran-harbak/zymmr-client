@@ -228,6 +228,156 @@ class ZymmrClient:
         
         return response
     
+    def insert(self, doctype: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a new document in Frappe.
+        
+        This method corresponds to Frappe's POST /api/resource/{doctype} endpoint.
+        
+        Args:
+            doctype: The DocType to create (e.g., 'Work Item', 'Project')
+            data: Dictionary containing the document data
+        
+        Returns:
+            Dictionary containing the created document data
+        
+        Raises:
+            ZymmrValidationError: If data is invalid or required fields missing
+            ZymmrPermissionError: If user lacks create permissions
+            ZymmrAPIError: For other API errors
+        
+        Example:
+            ```python
+            # Create a new work item
+            work_item = client.insert("Work Item", {
+                "title": "Fix login bug",
+                "project": "PROJ-001", 
+                "type": "Bug",
+                "priority": "High",
+                "description": "Users can't login with special characters"
+            })
+            
+            # Create a new project
+            project = client.insert("Project", {
+                "title": "New Website",
+                "key": "NW",
+                "description": "Company website redesign",
+                "lead": "john@company.com"
+            })
+            ```
+        """
+        if not doctype:
+            raise ZymmrValidationError("DocType cannot be empty")
+        
+        if not data or not isinstance(data, dict):
+            raise ZymmrValidationError("Data must be a non-empty dictionary")
+        
+        url = f"/api/resource/{doctype}"
+        
+        if self.debug:
+            print(f"[DEBUG] Creating {doctype} with data: {data}")
+        
+        response = self._http.post(url, json=data)
+        
+        # Frappe returns the created document data
+        if isinstance(response, dict):
+            return response.get('data', response)
+        
+        return response
+    
+    def update(self, doctype: str, name: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an existing document in Frappe.
+        
+        This method corresponds to Frappe's PUT /api/resource/{doctype}/{name} endpoint.
+        
+        Args:
+            doctype: The DocType (e.g., 'Work Item', 'Project')
+            name: The name/ID of the document to update
+            data: Dictionary containing the fields to update
+        
+        Returns:
+            Dictionary containing the updated document data
+        
+        Raises:
+            ZymmrNotFoundError: If document doesn't exist
+            ZymmrValidationError: If data is invalid
+            ZymmrPermissionError: If user lacks write permissions
+            ZymmrAPIError: For other API errors
+        
+        Example:
+            ```python
+            # Update work item status
+            updated_item = client.update("Work Item", "WI-123", {
+                "status": "In Progress",
+                "assignee": "jane@company.com"
+            })
+            
+            # Update project end date
+            updated_project = client.update("Project", "PROJ-001", {
+                "end_date": "2024-12-31",
+                "status": "Active"
+            })
+            ```
+        """
+        if not doctype or not name:
+            raise ZymmrValidationError("Both doctype and name are required")
+        
+        if not data or not isinstance(data, dict):
+            raise ZymmrValidationError("Data must be a non-empty dictionary")
+        
+        url = f"/api/resource/{doctype}/{name}"
+        
+        if self.debug:
+            print(f"[DEBUG] Updating {doctype} {name} with data: {data}")
+        
+        response = self._http.put(url, json=data)
+        
+        # Frappe returns the updated document data
+        if isinstance(response, dict):
+            return response.get('data', response)
+        
+        return response
+    
+    def delete(self, doctype: str, name: str) -> bool:
+        """Delete a document from Frappe.
+        
+        This method corresponds to Frappe's DELETE /api/resource/{doctype}/{name} endpoint.
+        
+        Args:
+            doctype: The DocType (e.g., 'Work Item', 'Project')
+            name: The name/ID of the document to delete
+        
+        Returns:
+            True if deletion was successful
+        
+        Raises:
+            ZymmrNotFoundError: If document doesn't exist
+            ZymmrPermissionError: If user lacks delete permissions
+            ZymmrAPIError: For other API errors
+        
+        Example:
+            ```python
+            # Delete a work item
+            success = client.delete("Work Item", "WI-123")
+            if success:
+                print("Work item deleted successfully")
+            
+            # Delete a time log
+            client.delete("Time Log", "TL-456")
+            ```
+        """
+        if not doctype or not name:
+            raise ZymmrValidationError("Both doctype and name are required")
+        
+        url = f"/api/resource/{doctype}/{name}"
+        
+        if self.debug:
+            print(f"[DEBUG] Deleting {doctype} {name}")
+        
+        response = self._http.delete(url)
+        
+        # Frappe typically returns success message or empty response for deletes
+        return True  # If no exception was raised, deletion was successful
+    
     def ping(self) -> bool:
         """Test connection to server.
         
