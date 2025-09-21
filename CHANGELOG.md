@@ -5,7 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2024-09-18
+## [0.2.1] - 2025-09-21
+
+### Added
+- **Resource-Based API Pattern** - New modern hierarchical API for better developer experience
+- **Projects Resource Implementation** - Complete Projects resource with full CRUD operations:
+  - `client.projects.list()` - List projects with filtering and pagination
+  - `client.projects.get()` - Get specific project by ID
+  - `client.projects.create()` - Create new projects
+  - `client.projects.update()` - Update existing projects
+  - `client.projects.delete()` - Delete projects
+- **Convenience Methods** for Projects:
+  - `client.projects.get_active()` - Get all active projects
+  - `client.projects.get_by_user()` - Get projects by user email
+  - `client.projects.get_analytics()` - Get project analytics (framework ready)
+- **Project Model Class** - Object-oriented interface for projects with properties:
+  - `project.title`, `project.status`, `project.lead`, `project.is_active`
+  - `project.project_id`, `project.description`, `project.start_date`, `project.end_date`
+- **ResourceList Class** - Enhanced list handling with filtering and metadata
+- **BaseResourceClient** - Reusable base class for future resource implementations
+- **Enhanced Documentation** - Updated README with both Generic and Resource API examples
+
+### Changed
+- **Package Structure** - Added `resources.py` and enhanced `models.py` for resource-based API
+- **Client Integration** - `ZymmrClient` now supports both Generic and Resource APIs
+- **Import Structure** - Added `Project`, `ProjectsClient`, and `ResourceList` to main exports
+
+### Technical Details
+- **Resource-Based Pattern**: Follows modern API client patterns (GitHub API style)
+- **Hierarchical Access**: `client.projects.*` pattern for intuitive resource management
+- **Model Classes**: Rich object representation with property access
+- **Backward Compatibility**: Generic API remains fully functional for all DocTypes
+- **Future-Proof**: Architecture ready for additional resources (Work Items, Time Logs, etc.)
+
+## [0.2.0] - 2025-09-18
 
 ### Added
 - **Complete Frappe Framework v14 integration** - Built specifically for Frappe-based applications
@@ -46,14 +79,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Session-based auth via `POST /api/method/login`
 - Production-ready with proper error handling and retries
 
-## [0.1.1] - 2024-09-17
+## [0.1.1] - 2025-09-17
 
 ### Added
 - Initial package structure with uv
 - Basic project metadata and configuration
 - MIT License and GitHub repository setup
 
-## [0.1.0] - 2024-09-17
+## [0.1.0] - 2025-09-17
 
 ### Added
 - Initial project setup
