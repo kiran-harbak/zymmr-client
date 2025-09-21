@@ -31,7 +31,7 @@ class ZymmrClient:
         ```python
         # Initialize client
         client = ZymmrClient(
-            base_url="https://zymmr.yourdomain.com",
+            base_url="https://yourdomain.zymmr.com",
             username="your-username",
             password="your-password"
         )
@@ -81,7 +81,7 @@ class ZymmrClient:
         """Initialize Zymmr client.
 
         Args:
-            base_url: Base URL of your Zymmr instance (e.g., 'https://zymmr.yourdomain.com')
+            base_url: Base URL of your Zymmr instance (e.g., 'https://yourdomain.zymmr.com')
             username: Username for authentication
             password: Password for authentication
             timeout: Request timeout in seconds (default: 30)

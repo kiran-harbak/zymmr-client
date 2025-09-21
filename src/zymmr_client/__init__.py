@@ -16,7 +16,7 @@ Example usage - Generic API (still supported):
 
     # Initialize client
     client = ZymmrClient(
-        base_url="https://zymmr.yourdomain.com",
+        base_url="https://yourdomain.zymmr.com",
         username="your-username",
         password="your-password"
     )
