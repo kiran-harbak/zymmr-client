@@ -53,11 +53,11 @@ class ZymmrClient:
         # Get active projects only
         active_projects = client.projects.get_active()
 
-        # Get projects by user
-        my_projects = client.projects.get_by_user("user@example.com")
+        # Get projects by lead email
+        my_projects = client.projects.get_by_lead("admin@example.com")
 
-        # Get specific project
-        project = client.projects.get("PROJ-001")
+        # Get specific project by key
+        project = client.projects.get("ZMR")
 
         # Create new project
         new_project = client.projects.create({

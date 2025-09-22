@@ -107,8 +107,8 @@ projects = client.projects.list(
 # Get active projects only
 active_projects = client.projects.get_active()
 
-# Get projects by user
-my_projects = client.projects.get_by_user("pm@company.com")
+# Get projects by lead
+my_projects = client.projects.get_by_lead("pm@company.com")
 
 # Get specific project
 project = client.projects.get("PROJ-001")
@@ -393,8 +393,8 @@ if success:
 # Get active projects only
 active_projects = client.projects.get_active()
 
-# Get projects by user
-user_projects = client.projects.get_by_user("pm@company.com")
+# Get projects by lead
+user_projects = client.projects.get_by_lead("pm@company.com")
 
 # Get project analytics
 analytics = client.projects.get_analytics("PROJ-001", period="last_month")
@@ -515,8 +515,8 @@ print(f"Project status: {updated_project['status']}")
 active_projects = client.projects.get_active()
 print(f"Found {len(active_projects)} active projects")
 
-# Get projects by user
-my_projects = client.projects.get_by_user("pm@company.com")
+# Get projects by lead
+my_projects = client.projects.get_by_lead("pm@company.com")
 print(f"Found {len(my_projects)} projects I'm leading")
 
 # Get project analytics
@@ -557,7 +557,7 @@ all_projects = client.projects.list(limit_page_length=50)
 active_projects = client.projects.get_active()
 
 # Get projects by user (convenience method)
-my_projects = client.projects.get_by_user("pm@company.com")
+my_projects = client.projects.get_by_lead("pm@company.com")
 
 # Get projects with filters
 filtered_projects = client.projects.list(

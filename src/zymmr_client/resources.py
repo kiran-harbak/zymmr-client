@@ -91,7 +91,7 @@ class BaseResourceClient:
         """Get a single document by key.
 
         Args:
-            key: The key of the document
+            key: The key of the document (e.g., 'ZMR', 'WI-001')
             fields: List of field names to fetch
             **kwargs: Additional parameters
 
@@ -107,15 +107,21 @@ class BaseResourceClient:
 
         params.update(kwargs)
 
-        url = f"/api/resource/{self.doctype}/"
+        # Filter by key field, not name field
         params['filters'] = json.dumps({'key': key})
+        url = f"/api/resource/{self.doctype}/"
         response = self.http_client.get(url, params=params)
 
         # Frappe returns the document data directly or in 'data' field
-        if isinstance(response, dict):
-            return response.get('data', response)
+        if isinstance(response, dict) and 'data' in response:
+            data = response['data']
+            if isinstance(data, list) and len(data) > 0:
+                return data[0]  # Return first match
+            return data
+        elif isinstance(response, list) and len(response) > 0:
+            return response[0]  # Return first match
 
-        return response
+        raise ZymmrValidationError(f"Document with key '{key}' not found")
 
     def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new document in Frappe.
@@ -211,23 +217,42 @@ class ProjectsClient(BaseResourceClient):
             order_by="title"
         )
 
-    def get_by_user(
+    def get_by_lead(
         self,
-        user_id: str,
+        lead_email: str,
         fields: Optional[List[str]] = None
     ) -> ResourceList:
-        """Get projects where the user is the lead.
+        """Get projects by lead.
 
         Args:
-            user_id: User ID (as stored in the lead field, e.g., '866d6822-2afd-49fa-8998-b79510f5f802')
+            lead_email: Email address of the lead (e.g., 'admin@example.com')
             fields: List of field names to fetch
 
         Returns:
-            ResourceList of projects where the user is the lead
+            ResourceList of projects by lead.
         """
+        if not lead_email or '@' not in lead_email:
+            raise ZymmrValidationError("Valid email address is required")
+
+        # Build the request parameters
+        params = {
+            'doctype': 'User',
+            'fieldname': 'name',
+            'filters': json.dumps({'email': lead_email})
+        }
+
+        # Get the lead ID
+        url = "/api/method/frappe.client.get_value"
+        lead_id = self.http_client.get(url, params=params)['message']['name']
+
+        if not lead_id:
+            raise ZymmrValidationError(
+                f"Lead with email '{lead_email}' not found")
+
+        # Get the projects by lead
         return self.list(
             fields=fields,
-            filters={"lead": user_id},
+            filters={"lead": lead_id},
             order_by="creation desc"
         )
 
