@@ -47,13 +47,43 @@ Example usage - Resource-Based API (New) - Projects:
     # Get specific project by key
     project = client.projects.get("ZMR")
 
-    # Create new project
-    new_project = client.projects.create({
-        "title": "My New Project",
-        "key": "MNP",
-        "description": "Project description",
-        "lead": "pm@example.com"
+        # Create new project
+        new_project = client.projects.create({
+            "title": "My New Project",
+            "key": "MNP",
+            "description": "Project description",
+            "lead": "pm@example.com"
+        })
+        ```
+
+Example usage - Resource-Based API (New) - Work Items:
+    ```python
+    from zymmr_client import ZymmrClient
+
+    # List work items for a project
+    work_items = client.work_items.list(project="PROJ-001")
+
+    # Get work items by type
+    stories = client.work_items.get_by_type("Story")
+
+    # Get work items by priority
+    high_priority = client.work_items.get_by_priority(["High", "Critical"])
+
+    # Get work items by assignee
+    my_work_items = client.work_items.get_by_assignee("dev@example.com")
+
+    # Create new work item
+    new_work_item = client.work_items.create({
+        "title": "Implement new feature",
+        "project": "ZMR",
+        "type": "Story",
+        "priority": "High",
+        "description": "Implement the new feature as requested",
+        "passignee": "dev@example.com"  # Primary assignee
     })
+
+    # Get work items by project
+    project_work_items = client.work_items.get_by_project("ZMR")
     ```
 """
 
@@ -75,10 +105,12 @@ from .exceptions import (
 )
 from .models import (
     Project,
+    WorkItem,
     ResourceList
 )
 from .resources import (
-    ProjectsClient
+    ProjectsClient,
+    WorkItemsClient
 )
 
 __all__ = [
@@ -97,10 +129,12 @@ __all__ = [
 
     # Models
     "Project",
+    "WorkItem",
     "ResourceList",
 
     # Resource clients
     "ProjectsClient",
+    "WorkItemsClient",
 ]
 
 

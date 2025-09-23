@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 from .auth import FrappeAuth
 from .exceptions import ZymmrValidationError
 from .http import HTTPClient
-from .resources import ProjectsClient
+from .resources import ProjectsClient, WorkItemsClient
 
 
 class ZymmrClient:
@@ -66,6 +66,22 @@ class ZymmrClient:
             "description": "Project description",
             "lead": "pm@example.com"
         })
+        ```
+
+    Example - Resource-Based API (New) - Work Items:
+        ```python
+        # Create new work item
+        new_work_item = client.work_items.create({
+            "title": "Implement new feature",
+            "project": "<hashofproject>",
+            "type": "<typeoftype>",
+            "priority": "High",
+            "description": "Implement the new feature as requested",
+            "passignee": "<hashofuser>"  # Primary assignee
+        })
+
+        # Get work items by project
+        project_work_items = client.work_items.get_by_project("ZMR")
         ```
     """
 
@@ -125,6 +141,17 @@ class ZymmrClient:
         if not hasattr(self, '_projects_client'):
             self._projects_client = ProjectsClient(self._http)
         return self._projects_client
+
+    @property
+    def work_items(self) -> WorkItemsClient:
+        """Get the Work Items resource client.
+
+        Returns:
+            WorkItemsClient instance for managing work items
+        """
+        if not hasattr(self, '_work_items_client'):
+            self._work_items_client = WorkItemsClient(self._http)
+        return self._work_items_client
 
     def get_list(
         self,

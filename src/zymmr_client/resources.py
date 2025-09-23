@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from .exceptions import ZymmrValidationError
 from .http import HTTPClient
-from .models import ResourceList
+from .models import Project, WorkItem, ResourceList
 
 
 class BaseResourceClient:
@@ -258,13 +258,13 @@ class ProjectsClient(BaseResourceClient):
 
     def get_analytics(
         self,
-        project_id: str,
+        project_key: str,
         period: str = "last_month"
     ) -> Dict[str, Any]:
         """Get analytics data for a project.
 
         Args:
-            project_id: The project ID/key
+            project_key: The project key (e.g., 'ZMR')
             period: Time period for analytics (e.g., 'last_month', 'this_quarter')
 
         Returns:
@@ -272,9 +272,57 @@ class ProjectsClient(BaseResourceClient):
         """
         # This would integrate with analytics endpoints
         # For now, return basic project info
-        project = self.get(project_id)
+        project = self.get(project_key)
         return {
             "project": project,
             "period": period,
             "message": "Analytics feature to be implemented"
         }
+
+
+class WorkItemsClient(BaseResourceClient):
+    """Client for managing Work Item resources.
+
+    This class provides methods for managing work items and follows the
+    hierarchical client pattern for accessing nested resources.
+    """
+
+    def __init__(self, http_client: HTTPClient):
+        """Initialize WorkItemsClient.
+
+        Args:
+            http_client: HTTP client instance for making requests
+        """
+        super().__init__(http_client, "Work Item")
+
+    def get_by_project(
+        self,
+        project_key: str,
+        fields: Optional[List[str]] = None,
+    ) -> ResourceList:
+        """Get all work items for a specific project.
+
+        Args:
+            project_key: The project key (e.g., 'ZMR')
+            fields: List of field names to fetch
+
+        Returns:
+            ResourceList of work items for the project
+        """
+        # Get the project id from the project key
+        url = '/api/method/frappe.client.get_value'
+        params = {
+            "doctype": "Project",
+            "fieldname": "name",
+            "filters": json.dumps({"key": project_key})
+        }
+        project = self.http_client.get(url, params=params)
+        project_id = project['message']['name']
+
+        filters = {"project": project_id}
+
+        return self.list(
+            fields=fields,
+            filters=filters,
+            order_by="priority desc, creation desc"
+        )
