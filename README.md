@@ -6,18 +6,18 @@
 
 A robust Python client library for interacting with Zymmr Project Management API, built on **Frappe Framework v14**.
 
-## ✨ Features
+## Features
 
-- 🚀 **Simple and Intuitive**: Clean API interface inspired by frappe-client but more robust
-- 🔐 **Frappe Authentication**: Session-based authentication with username/password
-- 📋 **Complete DocType Access**: Get any DocType from your Zymmr instance
-- 🏗️ **Resource-Based API**: Modern hierarchical API with Projects resource
-- 🔄 **Robust Error Handling**: Custom exceptions for all Frappe API scenarios
-- ⚡ **Retry Logic**: Exponential backoff for network failures
-- 💡 **Type Safety**: Full type hints for excellent developer experience
-- 🎯 **Production Ready**: Built for real-world Frappe applications
+- **Simple and Intuitive**: Clean API interface inspired by frappe-client but more robust
+- **Frappe Authentication**: Session-based authentication with username/password
+- **Complete DocType Access**: Get any DocType from your Zymmr instance
+- **Resource-Based API**: Modern hierarchical API with Projects resource
+- **Robust Error Handling**: Custom exceptions for all Frappe API scenarios
+- **Retry Logic**: Exponential backoff for network failures
+- **Type Safety**: Full type hints for excellent developer experience
+- **Production Ready**: Built for real-world Frappe applications
 
-## 📦 Installation
+## Installation
 
 ### Using uv (Recommended)
 ```bash
@@ -34,7 +34,7 @@ pip install zymmr-client
 poetry add zymmr-client
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Generic API (Works with any DocType)
 
@@ -78,14 +78,14 @@ client.update("Work Item", new_work_item["name"], {
 
 # Test connection
 if client.ping():
-    print("✅ Connected to Zymmr!")
+    print("Connected to Zymmr!")
 
 # Get current user info
 user_info = client.get_user_info()
 print(f"Logged in as: {user_info['username']}")
 ```
 
-### Resource-Based API (New) - Projects
+### Projects API
 
 ```python
 from zymmr_client import ZymmrClient
@@ -136,7 +136,51 @@ analytics = client.projects.get_analytics("PROJ-001", period="last_month")
 print(f"Project analytics: {analytics}")
 ```
 
-## 🔧 Configuration
+### Work Items API
+
+```python
+from zymmr_client import ZymmrClient
+
+# Initialize the client
+client = ZymmrClient(
+    base_url="https://zymmr.yourdomain.com",
+    username="your-username",
+    password="your-password"
+)
+
+# List all work items
+projects = client.work_items.list(
+    fields=["key", "title", "creation", "workflow_state" "priority", "project"],
+    filters={"priority": "High"},
+    order_by="key"
+)
+
+# Get specific work item by key
+work_item = client.work_items.get("WI-001")
+
+# Create new work item
+new_work_item = client.work_items.create({
+    "title": "Implement new feature",
+    "description": "Implement the new feature as requested",
+    "start_date": "2024-01-15",
+    ...other fields
+})
+
+# Update work item
+client.work_items.update("WI-001", {
+    "priority": "High",
+    "end_date": "2024-06-30",
+    ...other fields
+})
+
+# Delete work item by key
+client.work_items.delete("OLD-WI")
+
+# Get work item by project key
+project_work_items = client.work_items.get_by_project("PROJ-001")
+```
+
+## Configuration
 
 ### Basic Configuration
 ```python
@@ -168,7 +212,7 @@ with ZymmrClient(base_url, username, password) as client:
     # Session automatically closed when done
 ```
 
-## 📖 API Reference
+## API Reference
 
 ### Generic API (Works with any DocType)
 
@@ -297,128 +341,7 @@ if client.is_authenticated:
 client.close()
 ```
 
-### Resource-Based API (New) - Projects
-
-#### `client.projects.list(**kwargs)`
-Get a list of projects:
-
-```python
-# List all projects
-projects = client.projects.list()
-
-# With specific fields
-projects = client.projects.list(
-    fields=["title", "key", "status", "lead"]
-)
-
-# With filters
-active_projects = client.projects.list(
-    filters={"status": "Active"},
-    order_by="title"
-)
-
-# With pagination
-projects = client.projects.list(
-    limit_start=0,
-    limit_page_length=20
-)
-```
-
-#### `client.projects.get(name, **kwargs)`
-Get a specific project:
-
-```python
-# Get project by ID
-project = client.projects.get("PROJ-001")
-
-# Get project with specific fields only
-project = client.projects.get("PROJ-001",
-                           fields=["title", "status", "lead"])
-```
-
-#### `client.projects.create(data)`
-Create a new project:
-
-```python
-# Basic project creation
-project = client.projects.create({
-    "title": "Website Redesign",
-    "key": "WEB-REDESIGN",
-    "description": "Complete website overhaul",
-    "lead": "pm@company.com"
-})
-
-# Project with all fields
-project = client.projects.create({
-    "title": "Mobile App Development",
-    "key": "MOBILE-APP",
-    "description": "iOS and Android mobile application",
-    "lead": "pm@company.com",
-    "start_date": "2024-01-15",
-    "end_date": "2024-06-30",
-    "status": "Planning"
-})
-```
-
-#### `client.projects.update(name, data)`
-Update an existing project:
-
-```python
-# Update project status
-client.projects.update("PROJ-001", {
-    "status": "In Progress"
-})
-
-# Update multiple fields
-client.projects.update("PROJ-001", {
-    "status": "Completed",
-    "end_date": "2024-01-30",
-    "description": "Project completed successfully"
-})
-```
-
-#### `client.projects.delete(name)`
-Delete a project:
-
-```python
-# Delete a project
-success = client.projects.delete("OLD-PROJ")
-if success:
-    print("Project deleted successfully")
-```
-
-#### Convenience Methods
-
-```python
-# Get active projects only
-active_projects = client.projects.get_active()
-
-# Get projects by lead
-user_projects = client.projects.get_by_lead("pm@company.com")
-
-# Get project analytics
-analytics = client.projects.get_analytics("PROJ-001", period="last_month")
-```
-
-### Available DocTypes
-Access any DocType from your Zymmr/Frappe instance:
-
-```python
-# Standard Frappe DocTypes
-users = client.get_list("User")
-doctypes = client.get_list("DocType")
-
-# Zymmr-specific DocTypes
-projects = client.get_list("Project")
-work_items = client.get_list("Work Item")  # Main work tracking entity
-time_logs = client.get_list("Time Log")
-sprints = client.get_list("Sprint")
-
-# Custom DocTypes (based on your Zymmr setup)
-custom_docs = client.get_list("Your Custom DocType")
-```
-
-## 🎯 **Common Workflows**
+## Common Workflows
 
 ### **Complete Work Item Lifecycle**
 ```python
@@ -455,7 +378,7 @@ client.update("Work Item", work_item["name"], {
 })
 ```
 
-### **Project Management Operations**
+### Project Management Operations
 ```python
 # Create a new project
 project = client.insert("Project", {
@@ -486,7 +409,7 @@ project_work_items = client.get_list("Work Item",
 print(f"Project {project['key']} has {len(project_work_items)} work items")
 ```
 
-### **Project Resource Operations**
+### Project Resource Operations
 ```python
 # Create a new project using resource API
 project = client.projects.create({
@@ -524,7 +447,7 @@ analytics = client.projects.get_analytics(project["name"], period="last_month")
 print(f"Project analytics: {analytics}")
 ```
 
-### **Project Listing and Filtering**
+### Project Listing and Filtering
 
 #### **Generic API Approach**
 ```python
@@ -572,7 +495,7 @@ project_summaries = client.projects.list(
 )
 ```
 
-### **Project CRUD Operations**
+### Project CRUD Operations
 
 #### **Generic API**
 ```python
@@ -618,7 +541,7 @@ client.projects.update("WEBSITE", {
 client.projects.delete("WEBSITE")
 ```
 
-### **Time Tracking & Reporting**
+### Time Tracking & Reporting
 ```python
 from datetime import datetime, timedelta
 
@@ -638,7 +561,7 @@ total_billable = sum(
 print(f"Total billable hours this week: {total_billable}")
 ```
 
-### **API Usage Patterns**
+### API Usage Patterns
 
 You can use both APIs together as needed:
 
@@ -655,7 +578,7 @@ users = client.get_list("User")
 time_logs = client.get_list("Time Log")
 ```
 
-## 🛠️ Development
+## Development
 
 This project uses `uv` for dependency management and packaging:
 
@@ -686,7 +609,7 @@ uv run mypy src/
 uv build
 ```
 
-### 🧪 Running Tests
+### Running Tests
 ```bash
 # Run all tests
 uv run pytest
@@ -701,7 +624,7 @@ uv run pytest tests/test_client.py
 uv run pytest -v
 ```
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
@@ -711,31 +634,31 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 Changelog
+## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
 
-## 🐛 Issues
+## Issues
 
 If you encounter any issues or have feature requests, please [create an issue](https://github.com/kiran-harbak/zymmr-client/issues) on GitHub.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
+## Author
 
 **Kiran Harbak**
 - Email: kiran.harbak@amruts.com
 - GitHub: [@kiran-harbak](https://github.com/kiran-harbak)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Inspired by [frappe-client](https://github.com/frappe/frappe-client) but rebuilt for modern Python
 - Powered by [uv](https://github.com/astral-sh/uv) for fast dependency management
 
 ---
 
-⭐ **If you find this package useful, please consider giving it a star on GitHub!**
+If you find this package useful, please consider giving it a star on GitHub!
 
 **Package available on PyPI:** [https://pypi.org/project/zymmr-client/](https://pypi.org/project/zymmr-client/)
